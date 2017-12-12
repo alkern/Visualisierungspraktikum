@@ -57,6 +57,17 @@ namespace
             // figuring out 3 closest points to each other
             std::vector<std::vector<Point3>> closestPairList;
             closestPairList = threeNeighbourPointsList(criticalPoints3D);
+
+            //find the cutting points between triangles of closest pairs
+            std::vector<Point3> middlePoints;
+            for(size_t i = 0; i < closestPairList.size(); i++){
+                Point3 p1 = closestPairList[i][0];
+                Point3 p2 = closestPairList[i][1];
+                Point3 p3 = closestPairList[i][2];
+                middlePoints.push_back(getMiddle(p1,p2));
+                middlePoints.push_back(getMiddle(p1,p3));
+                middlePoints.push_back(getMiddle(p2,p3));
+            }
         }
 
 
@@ -71,38 +82,53 @@ namespace
                 //firstPoint
                 Point3 currentPointToFindNeighbour = pList[i];
 
+                //works now
                 std::vector<std::tuple<Point3,double>> pointDistanceTupleList;
                 for(size_t j = 0; j < pList.size(); j++){
-                    std::tuple<Point3,double> pointDistanceTuple(currentPointToFindNeighbour, getDistance(currentPointToFindNeighbour, pList[j]));
+                    std::tuple<Point3,double> pointDistanceTuple(pList[j], getDistance(currentPointToFindNeighbour, pList[j]));
                     pointDistanceTupleList.push_back(pointDistanceTuple);
-//                    debugLog()<<std::get<0>(pointDistanceTuple)<<std::endl;
-//                    debugLog()<<std::get<1>(pointDistanceTuple)<<std::endl;
-//not yet checked for correctness
                 }
-                // sort 2 closest ones
+
+                // find closest one
                 double shortestDistance = std::numeric_limits<double>::max();
                 Point3 closestPoint = Point3(0,0,0);
                 for(size_t j = 0; j < pointDistanceTupleList.size(); j++){
                     double distance = std::get<1>(pointDistanceTupleList[j]);
-
-                    if((distance < shortestDistance) && (distance != 0)){
+                    if((distance != 0) && (distance < shortestDistance)){
                         shortestDistance = distance;
                         closestPoint = std::get<0>(pointDistanceTupleList[j]);
-                        debugLog()<< "point" << closestPoint<<std::endl;
-                        debugLog()<< "initialPoint" << currentPointToFindNeighbour<<std::endl;
-                        debugLog()<< "distance" << shortestDistance<<std::endl;
                     }
                 }
-                debugLog()<< "p1" << closestPoint<<std::endl;
-                debugLog()<< "p2" << currentPointToFindNeighbour<<std::endl;
-                //add 3 points
+                // find second closest one ; refactor later
+                double secondShortestDistance = std::numeric_limits<double>::max();
+                Point3 secondClosestPoint = Point3(0,0,0);
+                for(size_t j = 0; j < pointDistanceTupleList.size(); j++){
+                    double secondDistance = std::get<1>(pointDistanceTupleList[j]);
+                    if((secondDistance != 0) && (secondDistance != shortestDistance) && (secondDistance < secondShortestDistance)){
+                        secondShortestDistance = secondDistance;
+                        secondClosestPoint = std::get<0>(pointDistanceTupleList[j]);
+                    }
+                }
+
+                // uncomment to check points
+                debugLog()<< "p1" << currentPointToFindNeighbour<<std::endl;
+                debugLog()<< "p2" << closestPoint<< "; distance: " << shortestDistance << std::endl;
+                debugLog()<< "p3" << secondClosestPoint<< "; distance: " << secondShortestDistance << std::endl;
+
+                //add 3 points to list and add that array to result
                 threeNeighbourPoints.push_back(currentPointToFindNeighbour);
-
-
+                threeNeighbourPoints.push_back(closestPoint);
+                threeNeighbourPoints.push_back(secondClosestPoint);
                 result.push_back(threeNeighbourPoints);
-
             }
             return result;
+        }
+
+
+        //CONTINUE HERE
+        //calculates the middle between 2 points
+        Point3 getMiddle(Point3 p1, Point3 p2){
+            return Point3(0,0,0);
         }
 
         //takes 2 Point3s and returns the distance as double
