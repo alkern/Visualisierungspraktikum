@@ -51,30 +51,21 @@ namespace
             if (!criticalPoints) return;
 
             //Hyperpoints erstellen
-//            std::vector<Point3> hyperPoints;
-//            std::vector<Point3> vertices;
-//            for (size_t i = 0; i < criticalPoints->size(); i++) {
-//                auto point = criticalPoints->operator[](i).first;
-//                Point3 hyperPoint(point[0], point[1], point[0]*point[0] + point[1]*point[1]);
-//                hyperPoints.push_back(hyperPoint);
+            std::vector<Point3> hyperPoints;
+            std::vector<Point3> vertices;
+            for (size_t i = 0; i < criticalPoints->size(); i++) {
+                auto point = criticalPoints->operator[](i).first;
+                Point3 hyperPoint(point[0], point[1], point[0]*point[0] + point[1]*point[1]);
+                hyperPoints.push_back(hyperPoint);
 
-//                vertices.push_back(Point3(point[0], point[1], 0));
-//            }
+                vertices.push_back(Point3(point[0], point[1], 0));
+            }
 
-            //----------------------------------------------------------------------------------------------------------
-            std::vector<Point3> test;
-            test.push_back(Point3(0,2,0));
-            test.push_back(Point3(1,1,0));
-            test.push_back(Point3(2,1,0));
-            test.push_back(Point3(3,2,0));
-            test.push_back(Point3(1.5,1.5,0));
+            auto convexHull = getConvexHull(hyperPoints);
 
-            auto convexHull = getConvexHull(test);
-            debugLog() << "Testing" << std::endl;
-            debugLog() << convexHull.size() << std::endl;
-            //----------------------------------------------------------------------------------------------------------
-
-//            auto convexHull = getConvexHull(hyperPoints);
+            for (size_t i = 0; i < convexHull.size(); i++) {
+                convexHull[i] = Point3(convexHull[i][0], convexHull[i][1], 0);
+            }
 
             //Kanten der konvexen Hülle zeichnen
             std::vector<Point3> edges;
@@ -82,28 +73,28 @@ namespace
                 edges.push_back(convexHull[i]);
                 edges.push_back(convexHull[i + 1]);
             }
-            edges.push_back(convexHull[edges.size()]);
+            edges.push_back(convexHull[convexHull.size() - 1]);
             edges.push_back(convexHull[0]);
 
             mGlyphs->add(Primitive::LINES).setColor(Color(1,0,0)).setVertices(edges);
-            mGlyphs->add(Primitive::POINTS).setPointSize(4).setColor(Color(0,1,0)).setVertices(test);
+            mGlyphs->add(Primitive::POINTS).setPointSize(4).setColor(Color(0,1,0)).setVertices(vertices);
+
+            mGlyphs->add(Primitive::POINTS).setPointSize(8).setColor(Color(0,0,1)).setVertices(std::vector<Point3>({minimalPoint, Point3(0,0,0)}));
         }
 
-        double angleBetween(Point3 p0, Point3 p) {
-            double scalarProduct = p0 * p;
-            double lengthProduct = norm(p0) * norm(p);
+        double angleBetween(Point3 point) {
+            //Winkel zwischen den Geraden MINIMAL-point und der x-Achse
+            Vector3 xAxis(-1,0,0);
+            Vector3 p = minimalPoint - point;
+            double scalarProduct =  p * xAxis;
+            double lengthProduct = norm(p) * norm(xAxis);
             double value = acos(scalarProduct/lengthProduct) * 180/PI;
             return round( value * 1000.0 ) / 1000.0;
         }
 
-        bool angleCompare(Point3 p1, Point3 p2) {
-            return angleBetween(minimalPoint, p1) < angleBetween(minimalPoint, p2);
-        }
-
         /**
          * @brief getConvexHull
-         * Berechnet die konvexe Hülle einer Punktmenge mithilfe des Gift-Wrapping-Algorithmus
-         * https://de.wikipedia.org/wiki/Gift-Wrapping-Algorithmus
+         * Berechnet die konvexe Hülle einer Punktmenge mithilfe des Graham-Scan-Algorithmus
          * @param points
          * @return Randpunkte der konvexen Hülle
          */
@@ -123,61 +114,55 @@ namespace
             //Punkte nach Winkel sortieren
             std::vector<std::pair<Point3, double>> pointsWithAngles;
             for (Point3 p : points) {
-                pointsWithAngles.push_back(std::pair<Point3, double>(p, angleBetween(minOrdinate, p)));
+                if (p == minimalPoint) continue;
+                pointsWithAngles.push_back(std::pair<Point3, double>(p, angleBetween(p)));
             }
             std::sort(pointsWithAngles.begin(), pointsWithAngles.end(), [](std::pair<Point3, double> p1, std::pair<Point3, double> p2) -> bool {
                 return p1.second < p2.second;
             });
             std::vector<Point3> sorted;
+            sorted.push_back(minimalPoint);
+            double previousAngle = std::numeric_limits<double>::min();
             for (std::pair<Point3, double> p : pointsWithAngles) {
-                sorted.push_back(p.first);
+                if (previousAngle != p.second) { //keine Winkeldopplungen
+                    sorted.push_back(p.first);
+                    previousAngle = p.second;
+                }
             }
 
+            //Graham-Scan
             size_t i = 1;
-            while (i < sorted.size()) {
-                if (!isLeft(sorted[i], sorted[i-1], sorted[i+1])) {
+            while (i < sorted.size() - 1) {
+                Point3 current, previous, next;
+                current = sorted[i];
+                if (i == 0) {
+                    previous = sorted[sorted.size()];
+                } else {
+                    previous = sorted[i - 1];
+                }
+                if (i == sorted.size()) {
+                    next = sorted[0];
+                } else {
+                    next = sorted[i + 1];
+                }
+
+                //if (isRight(current, previous, next)) {
+                if (isRight(previous, next, current)) {
                     i++;
                 } else {
+                    debugLog() << "Current:" << current << " Previous:" << previous << " Next:" << next;
+                    debugLog() << " Erased " << sorted[i] << std::endl;
                     sorted.erase(sorted.begin() + i);
                     i--;
                 }
             }
 
             return sorted;
-
-//            std::vector<Point3> output; //P in pseudocode
-//            auto startPoint = minOrdinate;
-//            output.push_back(startPoint);
-//            Point3 endPoint(std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
-//            size_t i = 0;
-//            while (endPoint != output[0] && i < points.size()) {
-//                output[i] = startPoint;
-//                endPoint = points[0];
-
-//                for (size_t j = 1; j < points.size(); j++) {
-//                    if (endPoint == startPoint || isLeft(points[j], startPoint, endPoint)) {
-//                        endPoint = points[j];
-//                    }
-//                }
-//                startPoint = endPoint;
-//                i++;
-//            }
-//            return output;
         }
 
-//        /**
-//         * @brief isLeft
-//         * Prüfe, ob p links von der Gerade zwischen start und end
-//         * @param p
-//         * @param start
-//         * @param end
-//         * @return
-//         */
-        bool isLeft(Point3 si, Point3 start, Point3 end) {
-            double scalarProduct = (end - start) * (si - start);
-            double lengthProduct = norm(end - start) * norm(si - start);
-            double acosValue = acos(scalarProduct/lengthProduct) * 180/PI;
-            return acosValue > 180;
+        bool isRight(Point3 a, Point3 b, Point3 c) {
+            //gibt an, ob Punkt c rechts der Gerade ab liegt
+            return 0 > ((b[0] - a[0])*(c[1] - a[1])) - ((c[0] - a[0])*(b[1] - a[1]));
         }
 
     };
