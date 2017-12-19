@@ -15,13 +15,13 @@ namespace
         virtual Point2 nextStep(Point2 xn, TensorFieldContinuous<2, Point2>::Evaluator& evaluator) = 0;
         void reset() {setHasNext(true); numSteps = 0;}
         bool hasNext() {return dhn && this->numSteps < this->maxSteps;}
+        void setHasNext(bool b) {dhn = b;}
     protected:
         Integrator(double stepWidth, int maxSteps) {
             this->stepWidth = stepWidth;
             this->maxSteps = maxSteps;
             this->reset();
         }
-        void setHasNext(bool b) {dhn = b;}
         double stepWidth;
         double numSteps = 0;
         double maxSteps = 0;
@@ -114,6 +114,7 @@ namespace
                 add< int >("Number of Steps", "Maximale Anzahl an Integrationsschritten", 100);
                 add< Color >("Color", "Farbe der Stromlinien", Color(0.75, 0.75, 0.0));
                 add< DefaultValueArray<Point3> >("Seedpoints", "Saatpunkte");
+                add < double >("Delta Streamline", "Abbruchsdistanz fuer Streamlines", 0.01);
             }
 
             void optionChanged( const std::string& name )
@@ -148,6 +149,15 @@ namespace
 
             auto field = options.get<TensorFieldContinuous<2, Vector2>>("Field");
             if (!field) return;
+            auto grid = std::dynamic_pointer_cast<const Grid<2>>(field->domain());
+            if (!grid) return;
+
+            //Speichert die Stützstellen der Streamlines für einzelne Zellen um Abbruchskriterium einzusetzen
+            std::unordered_map<size_t, std::vector<Point3>> streamlinePointsInCell;
+            for (size_t i = 0; i < grid->numCells(); i++) {
+                streamlinePointsInCell.insert({i, std::vector<Point3>()});
+            }
+            double deltaStreamline = options.get<double>("Delta Streamline");
 
             auto startPointsValueArray = options.get< DefaultValueArray<Point3> >("Seedpoints");
             std::vector<Point3> startPoints;
@@ -166,6 +176,7 @@ namespace
 
             mGlyphs->add(Primitive::POINTS).setColor(Color(1, 0, 0)).setPointSize(4).setVertices(startPoints);
 
+            //Streamlines von Startpunkten aus zeichnen
             for (size_t i = 0; i < startPoints.size(); i++) {
                 auto evaluator = field->makeEvaluator();
                 auto startPoint = startPoints[i];
@@ -175,6 +186,16 @@ namespace
                     Vector3 nextPoint = to3D(integrator->nextStep(to2D(startPoint), *evaluator));
                     vertices.push_back(startPoint);
                     vertices.push_back(nextPoint);
+
+                    //bisherige Stützstellen vergleichen, abbrechen wenn zu nah
+                    size_t cellIndex = grid->index(grid->locate(to2D(nextPoint)));
+                    for (auto& point : streamlinePointsInCell[cellIndex]) {
+                        if (norm(point - nextPoint) < deltaStreamline && point != startPoint) {
+                            integrator->setHasNext(false); //falls Punkt zu nah, abbrechen
+                        }
+                    }
+                    streamlinePointsInCell[cellIndex].push_back(nextPoint);
+
                     startPoint = nextPoint;
                 }
                 integrator->reset();
