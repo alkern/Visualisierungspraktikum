@@ -68,32 +68,19 @@ class Euler
         void execute( const Algorithm::Options& options, const volatile bool& /* abortFlag */ ) override
         {
             mGlyphs = getGraphics("Streamlines").makePrimitive();
-            auto field = options.get< TensorFieldContinuous< 2, Vector2 > >("Field");
 
-            if (!field) return;
-            auto evaluator = field->makeEvaluator();
+            Point3 p1(1,-1,0);
+            Point3 p2(7,8,0);
 
-            Euler integrator(0.01);
-            std::vector<Point3> vertices;
+            debugLog() << getDistance(p1,p2) << std::endl;
+            debugLog() << norm(p1 - p2) << std::endl;
 
-            Point3 startPoint(1.983000, 0, 0);
-            //Point3 startPoint(-3, 3, 3);
-            Point3 p(0,0,0);
-            std::vector<Point3> startPoints;
-            startPoints.push_back(startPoint);
-            startPoints.push_back(p);
-            mGlyphs->add(Primitive::POINTS).setPointSize(4).setColor(Color(0,1,0)).setVertices(startPoints);
 
-            Point2 sp = to2D(startPoint);
-            while (integrator.hasNext()) {
-                Vector2 nextPoint = integrator.nextStep(sp, *evaluator);
-                vertices.push_back(to3D(sp));
-                vertices.push_back(to3D(nextPoint));
-                sp = nextPoint;
-            }
-            integrator.reset();
+        }
 
-            mGlyphs->add(Primitive::LINES).setColor(Color(1,0,0)).setVertices(vertices);
+        double getDistance(Point3 p1, Point3 p2){
+            double result = sqrt(pow((p2[0]-p1[0]), 2.0)+pow((p2[1]-p1[1]), 2.0));
+            return result;
         }
 
         Point2 to2D(Point3 p) {

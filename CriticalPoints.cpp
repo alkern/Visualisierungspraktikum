@@ -22,7 +22,6 @@ namespace
             Options( Control& control ) : DataAlgorithm::Options( control )
             {
                 add<TensorFieldContinuous<2, Vector2>>("Field", "Feld mit Input" );
-                add< Color >("Color", "Zeichenfarbe", Color(0.75, 0.75, 0.0));
             }
         };
 
