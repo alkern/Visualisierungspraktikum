@@ -31,15 +31,31 @@ namespace
 
     class Euler : public Integrator
     {
+        double epsilon;
+
     public:
-        Euler(double initialStepWidth, int maxSteps) : Integrator(initialStepWidth, maxSteps) {}
+        Euler(double initialStepWidth, int maxSteps, double eps) : Integrator(initialStepWidth, maxSteps) {
+            epsilon = eps;
+        }
         ~Euler() {}
 
         Point2 nextStep(Point2 startPoint, TensorFieldContinuous<2, Point2>::Evaluator& evaluator) override {
             this->numSteps++;
             if (evaluator.reset(startPoint)) {
                 auto changeRate = evaluator.value(); //Wert an der Stelle xn
-                auto nextPoint = startPoint + this->stepWidth * changeRate; //Addition und Multiplikation auf Tensoren ist definiert
+                auto nextPoint = startPoint + this->stepWidth * changeRate;
+
+                //Adaptive Schrittweitenanpassung
+                auto supportStep = startPoint + this->stepWidth * 0.5 * changeRate; //Wert in halber Entfernung zum Vergleich
+                if (norm(supportStep - nextPoint) * 10 < epsilon) { //Schrittweite bei sehr kleiner Differenz verdoppeln
+                    this->stepWidth *= 2;
+                    return nextStep(startPoint, evaluator);
+                }
+                if (norm(supportStep - nextPoint) > epsilon) { //Schrittweite bei großer Differenz halbieren
+                    this->stepWidth /= 2;
+                    return nextStep(startPoint, evaluator);
+                }
+
                 if (startPoint == nextPoint) this->setHasNext(false);
                 return nextPoint;
             }
@@ -93,10 +109,24 @@ namespace
             {
                 add< TensorFieldContinuous<2, Vector2>>("Field", "Feld mit Input" ); ///home/visprak11/fantom/TestData/streamTest2.vtk
                 add< InputChoices >("Method", "Integrationsverfahren", std::vector<std::string>({"Euler", "Runge-Kutta"}), "Euler");
-                add< double >("Stepwidth", "Schrittweite fuer das Euler-Verfahren", 1.0); //TODO disable for Runge-Kutta
-                add < int >("Number of Steps", "Maximale Anzahl an Integrationsschritten", 100);
+                add< double >("Stepwidth", "Schrittweite fuer das Euler-Verfahren", 0.1);
+                add< double >("Adaptiver Grenzwert", "Epsilon fuer die adaptive Schrittweitenanpassung bei Euler", 0.1);
+                add< int >("Number of Steps", "Maximale Anzahl an Integrationsschritten", 100);
                 add< Color >("Color", "Farbe der Stromlinien", Color(0.75, 0.75, 0.0));
                 add< DefaultValueArray<Point3> >("Seedpoints", "Saatpunkte");
+            }
+
+            void optionChanged( const std::string& name )
+            {
+                if( name == "Method" )
+                {
+                    std::string value = get< std::string >( "Method" );
+                    if (value.compare("Euler") == 0) {
+                        setVisible( "Adaptiver Grenzwert", true );
+                        return;
+                    }
+                    setVisible( "Adaptiver Grenzwert", false );
+                }
             }
         };
 
@@ -131,7 +161,7 @@ namespace
 
             Integrator* integrator;
             std::string method = options.get< std::string >("Method");
-            if (method.compare("Euler") == 0) integrator = new Euler(options.get< double >("Stepwidth"), options.get<int>("Number of Steps"));
+            if (method.compare("Euler") == 0) integrator = new Euler(options.get< double >("Stepwidth"), options.get<int>("Number of Steps"), options.get<double>("Adaptiver Grenzwert"));
             if (method.compare("Runge-Kutta") == 0) integrator = new RungeKutta(options.get< double >("Stepwidth"), options.get<int>("Number of Steps"));
 
             mGlyphs->add(Primitive::POINTS).setColor(Color(1, 0, 0)).setPointSize(4).setVertices(startPoints);
