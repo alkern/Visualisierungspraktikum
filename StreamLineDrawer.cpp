@@ -183,7 +183,7 @@ namespace
                 std::vector<Point3> vertices;
 
                 while (integrator->hasNext()) {
-                    Vector3 nextPoint = to3D(integrator->nextStep(to2D(startPoint), *evaluator));
+                    Point3 nextPoint = to3D(integrator->nextStep(to2D(startPoint), *evaluator));
                     vertices.push_back(startPoint);
                     vertices.push_back(nextPoint);
 

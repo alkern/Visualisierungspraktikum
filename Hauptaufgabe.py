@@ -6,10 +6,10 @@
 ################################################################
 ###                  Reset GUI                               ###
 ################################################################
-fantom.ui.setCamera( 0, fantom.ui.Camera( fantom.math.Vector3(4.62686, 0.332386, 18.2), fantom.math.Vector3(4.62686, 0.332386, 17.2), fantom.math.Vector3(0, 1, 0), 1, 3.45685e-310 ) )
+fantom.ui.setCamera( 0, fantom.ui.Camera( fantom.math.Vector3(6.57852, 0.88334, 14.9249), fantom.math.Vector3(6.58167, 0.88438, 13.9249), fantom.math.Vector3(0.00382364, 0.999992, 0.00105204), 1, 3.46667e-310 ) )
 fantom.ui.setCamera( 1, fantom.ui.Camera( fantom.math.Vector3(0, 3.8637, 0), fantom.math.Vector3(0, 2.8637, 0), fantom.math.Vector3(0, 0, 1), 0, 1 ) )
 fantom.ui.setCamera( 2, fantom.ui.Camera( fantom.math.Vector3(0, 0, 3.8637), fantom.math.Vector3(0, 0, 2.8637), fantom.math.Vector3(0, 1, 0), 0, 1 ) )
-fantom.ui.setCamera( 3, fantom.ui.Camera( fantom.math.Vector3(3.8637, 0, 0), fantom.math.Vector3(2.8637, 0, 0), fantom.math.Vector3(0, 0, 1), 0, 1 ) )
+fantom.ui.setCamera( 3, fantom.ui.Camera( fantom.math.Vector3(3.8637, -0.2, 0), fantom.math.Vector3(2.8637, -0.2, 0), fantom.math.Vector3(0, 0, 1), 0, 1 ) )
 
 fantom.ui.setClippingPlane( fantom.ui.ClippingPlane( 0, fantom.math.Matrix4( (1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1) ), False ) )
 fantom.ui.setClippingPlane( fantom.ui.ClippingPlane( 1, fantom.math.Matrix4( (1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1) ), False ) )
@@ -40,7 +40,7 @@ Grid_ShowGrid.setOption("Line color", fantom.math.Color(0, 0, 1, 1))
 Grid_ShowGrid.setOption("Random jittering of color", True)
 Grid_ShowGrid.setOption("Random seed", 0)
 Grid_ShowGrid.setOption("Line width", 1.5)
-fantom.ui.setAlgorithmPosition(Grid_ShowGrid, fantom.math.Vector2(0, 163))
+fantom.ui.setAlgorithmPosition(Grid_ShowGrid, fantom.math.Vector2(277, 26))
 Grid_ShowGrid.setVisualOutputVisible('grid', True)
 
 Hauptaufgabe_SeedPointPicker = fantom.makeAlgorithm("Hauptaufgabe/SeedPointPicker")
@@ -54,8 +54,8 @@ Hauptaufgabe_SeedPointPicker.setOption("Startline_end_z", 0)
 Hauptaufgabe_SeedPointPicker.setOption("Startline_3D_x", 9)
 Hauptaufgabe_SeedPointPicker.setOption("Startline_3D_y", -3)
 Hauptaufgabe_SeedPointPicker.setOption("Startline_3D_z", 0)
-Hauptaufgabe_SeedPointPicker.setOption("Number", 10)
-fantom.ui.setAlgorithmPosition(Hauptaufgabe_SeedPointPicker, fantom.math.Vector2(0, 249))
+Hauptaufgabe_SeedPointPicker.setOption("Number", 5)
+fantom.ui.setAlgorithmPosition(Hauptaufgabe_SeedPointPicker, fantom.math.Vector2(186.844, 209))
 
 Hauptaufgabe_StreamLineDrawer = fantom.makeAlgorithm("Hauptaufgabe/StreamLineDrawer")
 Hauptaufgabe_StreamLineDrawer.setName( "Hauptaufgabe/StreamLineDrawer" )
@@ -64,16 +64,35 @@ Hauptaufgabe_StreamLineDrawer.setOption("Stepwidth", 0.05)
 Hauptaufgabe_StreamLineDrawer.setOption("Adaptiver Grenzwert", 0.1)
 Hauptaufgabe_StreamLineDrawer.setOption("Number of Steps", 100000)
 Hauptaufgabe_StreamLineDrawer.setOption("Color", fantom.math.Color(0.75, 0.75, 0, 1))
-fantom.ui.setAlgorithmPosition(Hauptaufgabe_StreamLineDrawer, fantom.math.Vector2(0, 335))
+Hauptaufgabe_StreamLineDrawer.setOption("Delta Streamline", 0.01)
+fantom.ui.setAlgorithmPosition(Hauptaufgabe_StreamLineDrawer, fantom.math.Vector2(33, 337))
 Hauptaufgabe_StreamLineDrawer.setVisualOutputVisible('Streamlines', True)
+
+Hauptaufgabe_CriticalPoints = fantom.makeAlgorithm("Hauptaufgabe/CriticalPoints")
+Hauptaufgabe_CriticalPoints.setName( "Hauptaufgabe/CriticalPoints" )
+fantom.ui.setAlgorithmPosition(Hauptaufgabe_CriticalPoints, fantom.math.Vector2(452, 166))
+
+Hauptaufgabe_SeedpointTemplates = fantom.makeAlgorithm("Hauptaufgabe/SeedpointTemplates")
+Hauptaufgabe_SeedpointTemplates.setName( "Hauptaufgabe/SeedpointTemplates" )
+Hauptaufgabe_SeedpointTemplates.setOption("Delta Seed", 1)
+fantom.ui.setAlgorithmPosition(Hauptaufgabe_SeedpointTemplates, fantom.math.Vector2(345, 337))
+
+Hauptaufgabe_Voronoi = fantom.makeAlgorithm("Hauptaufgabe/Voronoi")
+Hauptaufgabe_Voronoi.setName( "Hauptaufgabe/Voronoi" )
+fantom.ui.setAlgorithmPosition(Hauptaufgabe_Voronoi, fantom.math.Vector2(634, 264))
+Hauptaufgabe_Voronoi.setVisualOutputVisible('Voronoi', True)
 
 
 
 ################################################################
 ###                     Make Connections                     ###
 ################################################################
+Hauptaufgabe_CriticalPoints.connect("Critical Points", Hauptaufgabe_Voronoi, "Critical Points")
 Hauptaufgabe_SeedPointPicker.connect("Seedpoints", Hauptaufgabe_StreamLineDrawer, "Seedpoints")
+Load_VTK.connect("Fields", Hauptaufgabe_Voronoi, "Field")
+Hauptaufgabe_CriticalPoints.connect("Critical Points", Hauptaufgabe_SeedpointTemplates, "Critical Points")
 Load_VTK.connect("Fields", Hauptaufgabe_StreamLineDrawer, "Field")
+Load_VTK.connect("Fields", Hauptaufgabe_CriticalPoints, "Field")
 Load_VTK.connect("Grid", Grid_ShowGrid, "Grid")
 
 
