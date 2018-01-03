@@ -23,6 +23,7 @@ namespace
                 add<DefaultValueArray<std::pair<Point2, CriticalPointType>>>( "Critical Points", "List of critical points");
                 //TODO voronoi-zellen
                 add<double>("Delta Seed", "Dichte der Seedpoints", 1);
+                add<DefaultValueArray<Point3>>("Random Points", "Zufällig verteilte Punkte");
             }
         };
 
@@ -70,10 +71,20 @@ namespace
             }
 
             //TODO mit zufälligen Punkten auffüllen
+            auto randomPoints = options.get<DefaultValueArray<Point3>>("Random Points");
+            if (randomPoints) {
+                for (size_t i = 0; i < randomPoints->size(); i++) {
+                    seedpoints.push_back(randomPoints->operator[](i));
+                }
+            }
 
             DefaultValueArray<Point3> valueArray(seedpoints, Precision::UINT64);
             auto result = std::make_shared<DefaultValueArray<Point3>>(valueArray);
             setResult("Seedpoints", result);
+        }
+
+        std::vector<Point2> distributeRandomPoints(double delta) {
+
         }
 
         Point2 getNextMiddlePoint(Point2 center, std::vector<Point2> pointList) {
