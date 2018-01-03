@@ -5,6 +5,7 @@
 #include <fantom/datastructures/DataObjectBundle.hpp>
 #include <fantom/graphics.hpp>
 #include <math.h>
+#include <Eigen/Dense>
 
 using namespace fantom;
 
@@ -69,11 +70,13 @@ class Euler
         {
             mGlyphs = getGraphics("Streamlines").makePrimitive();
 
-            Point3 p1(1,-1,0);
-            Point3 p2(7,8,0);
+            Eigen::MatrixXd m(2,2);
+            m(0,0) = 3;
+            m(1,0) = 2.5;
+            m(0,1) = -1;
+            m(1,1) = m(1,0) + m(0,1);
 
-            debugLog() << getDistance(p1,p2) << std::endl;
-            debugLog() << norm(p1 - p2) << std::endl;
+            debugLog() << m << std::endl;
 
 
         }
