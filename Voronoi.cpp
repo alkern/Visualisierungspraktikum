@@ -100,11 +100,6 @@ namespace
                 double s1 = orthogonalVectorM2[0];
                 double s2 = orthogonalVectorM2[1];
 
-                //to fix
-//                double b = (r2*(x1-x2)-r1*(y1-y2))/(r2*s1-r1*s2);
-//                double a = (y2+ b +s2 -y1)/r2;
-//                Point3 circleMiddle(x1+a*r1, y1+a*r2, 0);
-
                 double v = (r2*(a1-b1) - r1*(a2-b2)) / (r2*s1 - r1*s2);
                 Point3 circleMiddle(b1 + v * s1, b2 + v * s2, 0);
 
@@ -183,7 +178,6 @@ namespace
             Point3 result = p1 + ((p2-p1)/2) ;
             return result;
         }
-
 
         //take 2D Point and returns it in 3D
         Point3 to3D(Point2 p) {
