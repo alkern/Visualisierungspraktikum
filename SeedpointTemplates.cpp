@@ -3,6 +3,7 @@
 #include <fantom/fields.hpp>
 #include <fantom/datastructures/DataObjectBundle.hpp>
 #include "Util.h"
+#include <math.h>
 
 using namespace fantom;
 
@@ -29,7 +30,7 @@ namespace
         {
             DataOutputs( DataOutputs::Control& control) : DataAlgorithm::DataOutputs( control )
             {
-               add<DefaultValueArray<Point2>>( "Seedpoints" );
+               add<DefaultValueArray<Point3>>( "Seedpoints" );
             }
         };
 
@@ -40,57 +41,56 @@ namespace
         void execute( const Algorithm::Options& options, const volatile bool& /* abortFlag */ ) override
         {
             double deltaSeeds = options.get<double>("Delta Seed");
+            auto criticalPoints = options.get<DefaultValueArray<std::pair<Point2, CriticalPointType>>>("Critical Points");
+            if (!criticalPoints) return;
 
             std::vector<Point3> seedpoints;
 
+            std::vector<Point2> pointList;
+            for (size_t i = 0; i < criticalPoints->size(); i++) {
+                pointList.push_back(criticalPoints->operator[](i).first);
+            }
+
             //Pattern berechnen
-            //mit zufälligen Punkten auffüllen
+            for (size_t i = 0; i < criticalPoints->size(); i++) {
+                auto criticalPoint = criticalPoints->operator[](i);
+                Point2 nextMiddlePoint = getNextMiddlePoint(criticalPoint.first, pointList);
 
-            auto myCriticalPoints = options.get< DefaultValueArray<std::pair<Point2, CriticalPointType>>>("Critical Points");
-            if (!myCriticalPoints) return;
-
-            std::vector<Point2> onlyCriticalPoints;
-
-            for(size_t i = 0; i < myCriticalPoints -> size(); i++){
-                onlyCriticalPoints.push_back(myCriticalPoints->operator[](i).first);
+                if (criticalPoint.second == CriticalPointType::SINK || criticalPoint.second == CriticalPointType::SOURCE) {
+                    Point2 center = criticalPoint.first;
+                    double r = norm(center - nextMiddlePoint);
+                    unsigned int numberPointsOnCircle = abs(deltaSeeds * 10 * r);
+                    //unsigned int numberPointsOnCircle = 10;
+                    for (unsigned int i = 0; i < numberPointsOnCircle; i++) {
+                        double x = center[0] + r * cos(2 * M_PI * i / numberPointsOnCircle) / 2;
+                        double y = center[1] + r * sin(2 * M_PI * i / numberPointsOnCircle) / 2;
+                        seedpoints.push_back(to3D(Point2(x, y)));
+                    }
+                }
             }
 
-            for(size_t i = 0; i < onlyCriticalPoints.size(); i++){
-                Point2 test = getMiddlePoint(onlyCriticalPoints, onlyCriticalPoints[i]);
-                //HERE CONTINUE
-                debugLog() <<  test << std::endl;
-            }
+            //TODO mit zufälligen Punkten auffüllen
 
             DefaultValueArray<Point3> valueArray(seedpoints, Precision::UINT64);
             auto result = std::make_shared<DefaultValueArray<Point3>>(valueArray);
             setResult("Seedpoints", result);
         }
 
-        //FUNCTIONS
-        Point2 getMiddlePoint(std::vector<Point2> criticalPoints, Point2 point){
-            //calculate distances
-            std::vector<std::tuple<Point2,double>> pointDistanceTupleList;
-            for(size_t i = 0; i < criticalPoints.size(); i++){
-                std::tuple<Point2,double> pointDistanceTuple(criticalPoints[i], norm(point - criticalPoints[i]));
-                pointDistanceTupleList.push_back(pointDistanceTuple);
-            }
-
-            // find closest one
-            double shortestDistance = std::numeric_limits<double>::max();
-            Point2 closestPoint = Point2(0,0);
-            for(size_t i = 0; i < pointDistanceTupleList.size(); i++){
-                double distance = std::get<1>(pointDistanceTupleList[i]);
-                if((distance != 0) && (distance < shortestDistance)){
-                    shortestDistance = distance;
-                    closestPoint = std::get<0>(pointDistanceTupleList[i]);
+        Point2 getNextMiddlePoint(Point2 center, std::vector<Point2> pointList) {
+            Point2 nearestPoint = pointList[0];
+            for (Point2& point : pointList) {
+                if (center == point) continue;
+                if (norm(point - center) < norm(nearestPoint - center)) {
+                    nearestPoint = point;
                 }
             }
-            Point2 result = closestPoint;
-            return result;
+            return nearestPoint;
         }
 
-};
+        Point3 to3D(Point2 p) {
+            return Point3(p[0], p[1], 0);
+        }
+    };
 
-    AlgorithmRegister<SeedpointTemplateAlgorithm> reg("Hauptaufgabe/SeedpointTemplates", "Berechnet SeedpointTemplates aus kritischen Punkten und Voronoi-Zellen");
-
+    AlgorithmRegister<SeedpointTemplateAlgorithm> reg("Hauptaufgabe/SeedpointTemplates", "Berechnet SeedpointTemplates aus kritischen Punkten");
 }
