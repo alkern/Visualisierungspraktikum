@@ -6,7 +6,7 @@
 ################################################################
 ###                  Reset GUI                               ###
 ################################################################
-fantom.ui.setCamera( 0, fantom.ui.Camera( fantom.math.Vector3(6.57852, 0.88334, 14.9249), fantom.math.Vector3(6.58167, 0.88438, 13.9249), fantom.math.Vector3(0.00382364, 0.999992, 0.00105204), 1, -3.47639e-310 ) )
+fantom.ui.setCamera( 0, fantom.ui.Camera( fantom.math.Vector3(7.64993, -1.95065, 10.2158), fantom.math.Vector3(7.65308, -1.94961, 9.21583), fantom.math.Vector3(0.00382364, 0.999992, 0.00105204), 1, 3.45871e-310 ) )
 fantom.ui.setCamera( 1, fantom.ui.Camera( fantom.math.Vector3(0, 3.8637, 0), fantom.math.Vector3(0, 2.8637, 0), fantom.math.Vector3(0, 0, 1), 0, 1 ) )
 fantom.ui.setCamera( 2, fantom.ui.Camera( fantom.math.Vector3(0, 0, 3.8637), fantom.math.Vector3(0, 0, 2.8637), fantom.math.Vector3(0, 1, 0), 0, 1 ) )
 fantom.ui.setCamera( 3, fantom.ui.Camera( fantom.math.Vector3(3.8637, -0.2, 0), fantom.math.Vector3(2.8637, -0.2, 0), fantom.math.Vector3(0, 0, 1), 0, 1 ) )
@@ -79,7 +79,9 @@ fantom.ui.setAlgorithmPosition(Hauptaufgabe_SeedpointTemplates, fantom.math.Vect
 
 Hauptaufgabe_PoissonDiscDistribution = fantom.makeAlgorithm("Hauptaufgabe/PoissonDiscDistribution")
 Hauptaufgabe_PoissonDiscDistribution.setName( "Hauptaufgabe/PoissonDiscDistribution" )
-Hauptaufgabe_PoissonDiscDistribution.setOption("Delta Seed", 1)
+Hauptaufgabe_PoissonDiscDistribution.setOption("Delta Seed", 0.5)
+Hauptaufgabe_PoissonDiscDistribution.setOption("Grow Rate", 15)
+Hauptaufgabe_PoissonDiscDistribution.setOption("Number Start Points", 5)
 fantom.ui.setAlgorithmPosition(Hauptaufgabe_PoissonDiscDistribution, fantom.math.Vector2(144.016, 120.52))
 
 
@@ -89,10 +91,11 @@ fantom.ui.setAlgorithmPosition(Hauptaufgabe_PoissonDiscDistribution, fantom.math
 ################################################################
 Load_VTK.connect("Grid", Hauptaufgabe_PoissonDiscDistribution, "Grid")
 Load_VTK.connect("Grid", Grid_ShowGrid, "Grid")
-Load_VTK.connect("Fields", Hauptaufgabe_CriticalPoints, "Field")
 Load_VTK.connect("Fields", Hauptaufgabe_StreamLineDrawer, "Field")
+Load_VTK.connect("Fields", Hauptaufgabe_CriticalPoints, "Field")
 Hauptaufgabe_CriticalPoints.connect("Critical Points", Hauptaufgabe_SeedpointTemplates, "Critical Points")
-Hauptaufgabe_SeedPointPicker.connect("Seedpoints", Hauptaufgabe_StreamLineDrawer, "Seedpoints")
+Hauptaufgabe_PoissonDiscDistribution.connect("Seedpoints", Hauptaufgabe_SeedpointTemplates, "Random Points")
+Hauptaufgabe_SeedpointTemplates.connect("Seedpoints", Hauptaufgabe_StreamLineDrawer, "Seedpoints")
 
 
 ################################################################

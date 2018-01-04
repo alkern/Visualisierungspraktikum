@@ -11,36 +11,6 @@ using namespace fantom;
 
 namespace
 {
-
-class Euler
-{
-    public:
-        Euler(double initialStepWidth) {
-            this->stepWidth = initialStepWidth;
-            this->reset();
-        }
-        ~Euler() {}
-
-        Point2 nextStep(Point2 startPoint, TensorFieldContinuous<2, Point2>::Evaluator& evaluator) {
-            if (evaluator.reset(startPoint)) {
-                auto changeRate = evaluator.value(); //Wert an der Stelle xn
-                auto nextPoint = startPoint + this->stepWidth * changeRate; //Addition und Multiplikation auf Tensoren ist definiert
-                if (startPoint == nextPoint) this->setHasNext(false);
-                return nextPoint;
-            }
-            this->setHasNext(false);
-            return startPoint;
-        }
-
-        void reset() {setHasNext(true);}
-        bool hasNext() {return dhn;}
-    protected:
-        void setHasNext(bool b) {dhn = b;}
-        double stepWidth;
-    private:
-        bool dhn;
-    };
-
     class VisThresholdAlgorithm : public VisAlgorithm
     {
         std::unique_ptr< Primitive > mGlyphs;
@@ -51,6 +21,7 @@ class Euler
             Options( Control& control ) : VisAlgorithm::Options( control )
             {
                 add< TensorFieldContinuous< 2, Vector2 > >("Field", "Feld mit Input" );
+                add< Grid < 2 > >("Grid", "Grid" );
             }
         };
 
@@ -70,15 +41,23 @@ class Euler
         {
             mGlyphs = getGraphics("Streamlines").makePrimitive();
 
-            Eigen::MatrixXd m(2,2);
-            m(0,0) = 3;
-            m(1,0) = 2.5;
-            m(0,1) = -1;
-            m(1,1) = m(1,0) + m(0,1);
+            auto grid = options.get<Grid<2>>("Grid");
+            if (!grid) return;
 
-            debugLog() << m << std::endl;
+            Point2 p(10000,100000);
 
+            Cell c = grid->locate(p);
 
+            if (!c) {
+                debugLog() << "Not a cell yay" << std::endl;
+                return;
+            }
+
+            if (grid->contains(c, p)) {
+                debugLog() << "In booh" << std::endl;
+            } else {
+                debugLog() << "Out yeah" << std::endl;
+            }
         }
 
         double getDistance(Point3 p1, Point3 p2){
