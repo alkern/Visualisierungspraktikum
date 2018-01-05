@@ -57,13 +57,13 @@ namespace
             while (!processQueue.empty()) {
                 Point2 currentPoint = processQueue.front();
                 processQueue.pop();
-                seedpoints.push_back(currentPoint);
 
                 for (size_t i = 0; i < newPointCount; i++) {
                     Point2 newPoint = generateNewPoint(currentPoint, deltaSeed);
                     if (!grid->locate(newPoint)) continue;
                     if (!inNeighbourhood(newPoint, seedpoints, deltaSeed)) {
                         processQueue.push(newPoint);
+                        seedpoints.push_back(newPoint);
                     }
                 }
             }

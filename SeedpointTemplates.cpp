@@ -75,10 +75,16 @@ namespace
                     }
 
                     //alle zufälligen Punkte im Radius entfernen
+                    std::vector<Point2> pointsToDeleteList;
+
                     for (size_t i = 0; i < randomPoints.size(); i++) {
                         if (norm(randomPoints[i] - center) < r) {
-                            randomPoints.erase(randomPoints.begin() + i);
+                            pointsToDeleteList.push_back(randomPoints[i]);
                         }
+                    }
+
+                    for (size_t i = 0; i < pointsToDeleteList.size(); i++) {
+                        randomPoints.erase(std::remove(randomPoints.begin(), randomPoints.end(), pointsToDeleteList[i]), randomPoints.end());
                     }
                 }
             }
@@ -101,7 +107,8 @@ namespace
                     nearestPoint = point;
                 }
             }
-            return nearestPoint;
+            Point2 middlePoint = center + (nearestPoint - center)/2;
+            return middlePoint;
         }
 
         Point3 to3D(Point2 p) {
