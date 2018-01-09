@@ -6,7 +6,7 @@
 
 using namespace fantom;
 
-enum CriticalPointType {SINK, SOURCE, SADDLE};
+enum CriticalPointType {SINK, SOURCE, SADDLE, CENTER};
 
 Point3 to3D(Point2 point);
 Point2 to2D(Point3 point);

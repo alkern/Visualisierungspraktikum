@@ -104,6 +104,21 @@ namespace
             return middle;
         }
 
+        /**
+         * @brief categorizeCriticalPoint
+         * @param eigenvalues: Absteigend sortierte Liste an Eigenwerten (Realteile)
+         * @return Typ des kritischen Punkts
+         */
+        CriticalPointType categorizeCriticalPoint(std::vector<double> eigenvalues) {
+            double lambda1 = eigenvalues[0];
+            double lambda2 = eigenvalues[1];
+            if (lambda1 == lambda2 && lambda1 == 0) return CriticalPointType::CENTER;
+            if (lambda1 > 0 && 0 > lambda2) return CriticalPointType::SADDLE;
+            if ((lambda1 > lambda2 && lambda2 > 0) || (abs(lambda1 - lambda2) < 0.1 && lambda1 > 0)) return CriticalPointType::SINK;
+            if ((lambda2 > lambda1 && 0 > lambda2) || (abs(lambda1 - lambda2) < 0.1 && 0 > lambda1)) return CriticalPointType::SOURCE;
+            throw std::invalid_argument("Not categorizable");
+        }
+
     };
 
     AlgorithmRegister< CriticalPointsAlgorithm > reg("Hauptaufgabe/CriticalPoints", "Markiert Zellen mit kritischen Punkten");
