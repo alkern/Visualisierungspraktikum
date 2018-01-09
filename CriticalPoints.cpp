@@ -50,9 +50,7 @@ namespace
 
             for (size_t i = 0; i < grid->numCells(); i++) {
                 auto cell = grid->cell(i);
-                if (containsCriticalPoint(cell, gridPoints, *evaluator)) {
-                    //log
-                }
+                findCriticalPoint(cell, gridPoints, *evaluator);
             }
 
             DefaultValueArray<std::pair<Point2, CriticalPointType>> valueArray(criticalPoints, Precision::UINT64);
@@ -60,7 +58,7 @@ namespace
             setResult("Critical Points", result);
         }
 
-        bool containsCriticalPoint(Cell cell, const ValueArray<Point2>& points, TensorFieldContinuous<2, Vector2>::Evaluator& evaluator) {
+        bool findCriticalPoint(Cell cell, const ValueArray<Point2>& points, TensorFieldContinuous<2, Vector2>::Evaluator& evaluator) {
             evaluator.reset(points[cell.index(0)]);
             Vector2 v0 = evaluator.value();
             evaluator.reset(points[cell.index(1)]);

@@ -22,7 +22,7 @@ namespace
             {
                 add<DefaultValueArray<std::pair<Point2, CriticalPointType>>>( "Critical Points", "List of critical points");
                 //TODO voronoi-zellen
-                add<double>("Delta Seed", "Dichte der Seedpoints", 1);
+                add<double>("Delta Seed", "Dichte der Seedpoints", 2.5);
                 add<DefaultValueArray<Point2>>("Random Points", "Zufällig verteilte Punkte");
                 add<TensorFieldContinuous<2, Vector2>>("Field", "Feld mit Input" );
             }

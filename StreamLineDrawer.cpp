@@ -114,7 +114,7 @@ namespace
                 add< int >("Number of Steps", "Maximale Anzahl an Integrationsschritten", 100);
                 add< Color >("Color", "Farbe der Stromlinien", Color(0.75, 0.75, 0.0));
                 add< DefaultValueArray<Point3> >("Seedpoints", "Saatpunkte");
-                add < double >("Delta Streamline", "Abbruchsdistanz fuer Streamlines", 0.01);
+                add < double >("Delta Streamline", "Abbruchsdistanz fuer Streamlines", 0.07);
             }
 
             void optionChanged( const std::string& name )
