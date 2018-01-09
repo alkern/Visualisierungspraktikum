@@ -167,7 +167,7 @@ namespace
 
     };
 
-    AlgorithmRegister<VoronoiAlgorithm> reg("Hauptaufgabe/Voronoi", "Berechne Voronoizellen");
+    AlgorithmRegister<VoronoiAlgorithm> reg("Hauptaufgabe/Voronoi-2", "Berechne Voronoizellen");
 }
 
 
