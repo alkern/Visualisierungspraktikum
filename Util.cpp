@@ -28,7 +28,7 @@ std::vector<double> getEigenvalues(Point2 point, TensorFieldContinuous<2, Point2
     Eigen::Matrix2d jacobi = getJacobiMatrix(point, evaluator);
 
     Eigen::EigenSolver<Eigen::MatrixXd> es(jacobi);
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 2; i++) {
         eigenvalues.push_back(es.eigenvalues()(i).real());
     }
 
@@ -40,7 +40,7 @@ Eigen::Matrix2d getJacobiMatrix(Point2 point, TensorFieldContinuous<2, Point2>::
     Eigen::Matrix2d m(2,2);
     double h = 0.1;
 
-    //Vektor am Punkt und Vektoren in X- bzw. Y-Nachbarschaft bestimmen
+    //Vektoren am Punkt und in X- bzw. Y-Nachbarschaft bestimmen
     evaluator.reset(point);
     Vector2 vectorAtPoint = evaluator.value();
 
@@ -49,21 +49,21 @@ Eigen::Matrix2d getJacobiMatrix(Point2 point, TensorFieldContinuous<2, Point2>::
     evaluator.reset(point + Vector2(0,h));
     Vector2 vectorDeltaY = evaluator.value();
 
-    m(0,0) = differentialQuotient(vectorDeltaX[0], vectorAtPoint[0], h);
-    m(0,1) = differentialQuotient(vectorDeltaY[0], vectorAtPoint[0], h);
-    m(1,0) = differentialQuotient(vectorDeltaX[1], vectorAtPoint[1], h);
-    m(1,1) = differentialQuotient(vectorDeltaY[1], vectorAtPoint[1], h);
+    m(0,0) = differenzQuotient(vectorDeltaX[0], vectorAtPoint[0], h);
+    m(0,1) = differenzQuotient(vectorDeltaY[0], vectorAtPoint[0], h);
+    m(1,0) = differenzQuotient(vectorDeltaX[1], vectorAtPoint[1], h);
+    m(1,1) = differenzQuotient(vectorDeltaY[1], vectorAtPoint[1], h);
 
     return m;
 }
 
 /**
- * @brief differentialQuotient
+ * @brief differenzQuotient
  * @param deltaU: Funktionswert an der nächsten Stelle u+h
  * @param u: Funktionswert an der Stelle
  * @param h: Differenz
- * @return Änderung am Punkt u
+ * @return Änderung am Punkt mit Funktionswert u
  */
-double differentialQuotient(double deltaU, double u, double h) {
+double differenzQuotient(double deltaU, double u, double h) {
     return (deltaU - u) / h;
 }

@@ -1,6 +1,5 @@
 #include <fantom/algorithm.hpp>
 #include <fantom/register.hpp>
-#include <fantom/fields.hpp>
 #include "Util.hpp"
 
 using namespace fantom;
@@ -58,7 +57,7 @@ namespace
             setResult("Critical Points", result);
         }
 
-        bool findCriticalPoint(Cell cell, const ValueArray<Point2>& points, TensorFieldContinuous<2, Vector2>::Evaluator& evaluator) {
+        void findCriticalPoint(Cell cell, const ValueArray<Point2>& points, TensorFieldContinuous<2, Vector2>::Evaluator& evaluator) {
             evaluator.reset(points[cell.index(0)]);
             Vector2 v0 = evaluator.value();
             evaluator.reset(points[cell.index(1)]);
@@ -68,33 +67,29 @@ namespace
             evaluator.reset(points[cell.index(3)]);
             Vector2 v3 = evaluator.value();
 
+            //Kategorisierung eigentlich mit categorizeCriticalPoint(getEigenvalues(point.first, evaluator))
+
             //quellen
             if (v0[0] < 0 && v0[1] > 0 && v1[0] < 0 && v1[1] < 0 && v2[0] > 0 && v2[1] < 0 && v3[0] > 0 && v3[1] > 0) {
                 auto point = std::make_pair(getCenterPoint(cell, points), CriticalPointType::SOURCE);
                 criticalPoints.push_back(point);
-                return true;
             }
 
             //senken
             if (v0[0] > 0 && v0[1] < 0 && v1[0] > 0 && v1[1] > 0 && v2[0] < 0 && v2[1] > 0 && v3[0] < 0 && v3[1] < 0) {
                 auto point = std::make_pair(getCenterPoint(cell, points), CriticalPointType::SINK);
                 criticalPoints.push_back(point);
-                return true;
             }
 
             //sattel
             if (v0[0] > 0 && v0[1] < 0 && v1[0] < 0 && v1[1] < 0 && v2[0] < 0 && v2[1] > 0 && v3[0] > 0 && v3[1] > 0) {
                 auto point = std::make_pair(getCenterPoint(cell, points), CriticalPointType::SADDLE);
                 criticalPoints.push_back(point);
-                return true;
             }
             if (v0[0] < 0 && v0[1] > 0 && v1[0] > 0 && v1[1] > 0 && v2[0] > 0 && v2[1] < 0 && v3[0] < 0 && v3[1] < 0) {
                 auto point = std::make_pair(getCenterPoint(cell, points), CriticalPointType::SADDLE);
                 criticalPoints.push_back(point);
-                return true;
             }
-
-            return false;
         }
 
         Point2 getCenterPoint(Cell cell, const ValueArray<Point2>& points) {
@@ -110,13 +105,14 @@ namespace
          * @return Typ des kritischen Punkts
          */
         CriticalPointType categorizeCriticalPoint(std::vector<double> eigenvalues) {
+            double EPSILON = 0.000000001; //Grenze, um zwei doubles als gleich anzusehen @TODO sinnvollen Wert finden
             double lambda1 = eigenvalues[0];
             double lambda2 = eigenvalues[1];
-            if (lambda1 == lambda2 && lambda1 == 0) return CriticalPointType::CENTER;
+            if (abs(lambda1 - lambda2) < EPSILON && abs(lambda1 - 0) < EPSILON) return CriticalPointType::CENTER;
             if (lambda1 > 0 && 0 > lambda2) return CriticalPointType::SADDLE;
-            if ((lambda1 > lambda2 && lambda2 > 0) || (abs(lambda1 - lambda2) < 0.1 && lambda1 > 0)) return CriticalPointType::SINK;
-            if ((lambda2 > lambda1 && 0 > lambda2) || (abs(lambda1 - lambda2) < 0.1 && 0 > lambda1)) return CriticalPointType::SOURCE;
-            throw std::invalid_argument("Not categorizable");
+            if ((lambda1 > lambda2 && lambda2 > 0) || (abs(lambda1 - lambda2) < EPSILON && lambda1 > 0)) return CriticalPointType::SINK;
+            if ((lambda2 > lambda1 && 0 > lambda2) || (abs(lambda1 - lambda2) < EPSILON && 0 > lambda1)) return CriticalPointType::SOURCE;
+            return CriticalPointType::NONE; //default
         }
 
     };

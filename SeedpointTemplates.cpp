@@ -1,6 +1,5 @@
 #include <fantom/algorithm.hpp>
 #include <fantom/register.hpp>
-#include <fantom/fields.hpp>
 #include <fantom/datastructures/DataObjectBundle.hpp>
 #include "Util.hpp"
 #include <math.h>
@@ -91,6 +90,13 @@ namespace
                             seedpoints.push_back(to3D(center + j*r/numberPointsOnLines * bisector)); //Punkte gleichverteilt auf Orthogonalen zeichnen
                         }
                         seedpoints.push_back(to3D(center - r/2 * bisector)); //ein zusätzlicher Punkt in der entgegengesetzten Richtung
+                    }
+                }
+
+                if (criticalPoint.second == CriticalPointType::CENTER) {
+                    unsigned int numberPointsOnLines= deltaSeeds * 3 * r;
+                    for (unsigned int j = 1; j <= numberPointsOnLines; j++) { //nicht durch 0 dividieren
+                        seedpoints.push_back(to3D(center + j*r/numberPointsOnLines * Vector2(1, 0))); //Punkte gleichverteilt auf einer Geraden in X-Richtung zeichnen
                     }
                 }
 
