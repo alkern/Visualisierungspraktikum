@@ -2,7 +2,7 @@
 #include <fantom/register.hpp>
 #include <fantom/fields.hpp>
 #include <fantom/graphics.hpp>
-#include "Util.h"
+#include "Util.hpp"
 
 using namespace fantom;
 
@@ -202,14 +202,6 @@ namespace
 
                 mGlyphs->add(Primitive::LINES).setColor(options.get< Color >("Color")).setVertices(vertices);
             }
-        }
-
-        Point2 to2D(Point3 p) {
-            return Point2(p[0], p[1]);
-        }
-
-        Point3 to3D(Point2 p) {
-            return Point3(p[0], p[1], 0);
         }
 
     };

@@ -2,7 +2,7 @@
 #include <fantom/register.hpp>
 #include <fantom/fields.hpp>
 #include <fantom/graphics.hpp>
-#include "Util.h"
+#include "Util.hpp"
 #include <math.h>
 
 #define PI 3.14159265

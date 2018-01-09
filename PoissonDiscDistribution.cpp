@@ -2,7 +2,6 @@
 #include <fantom/register.hpp>
 #include <fantom/fields.hpp>
 #include <fantom/datastructures/DataObjectBundle.hpp>
-#include "Util.h"
 #include <queue>
 #include <math.h>
 

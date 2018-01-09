@@ -1,7 +1,7 @@
 #include <fantom/algorithm.hpp>
 #include <fantom/register.hpp>
 #include <fantom/fields.hpp>
-#include "Util.h"
+#include "Util.hpp"
 
 using namespace fantom;
 

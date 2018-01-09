@@ -1,11 +1,7 @@
 #include <fantom/algorithm.hpp>
 #include <fantom/register.hpp>
-#include <fantom/fields.hpp>
-#include <fantom/dataset/TensorFieldBase.hpp>
-#include <fantom/datastructures/DataObjectBundle.hpp>
 #include <fantom/graphics.hpp>
-#include <math.h>
-#include <Eigen/Dense>
+#include "Util.hpp"
 
 using namespace fantom;
 
@@ -29,7 +25,7 @@ namespace
         {
             VisOutputs( fantom::VisOutputs::Control& control ) : VisAlgorithm::VisOutputs( control )
             {
-                addGraphics( "Streamlines" );
+                //addGraphics( "Streamlines" );
             }
         };
 
@@ -39,38 +35,19 @@ namespace
 
         void execute( const Algorithm::Options& options, const volatile bool& /* abortFlag */ ) override
         {
-            mGlyphs = getGraphics("Streamlines").makePrimitive();
+            //mGlyphs = getGraphics("Streamlines").makePrimitive();
 
-            auto grid = options.get<Grid<2>>("Grid");
-            if (!grid) return;
-
-            Point2 p(10000,100000);
-
-            Cell c = grid->locate(p);
-
-            if (!c) {
-                debugLog() << "Not a cell yay" << std::endl;
-                return;
+            Eigen::Matrix3d m = Eigen::Matrix3d::Ones(3,3);
+            std::vector<double> eigenvalues;
+            Eigen::EigenSolver<Eigen::Matrix3d> es(m);
+            for (int i = 0; i < 3; i++) {
+                eigenvalues.push_back(es.eigenvalues()(i).real());
             }
-
-            if (grid->contains(c, p)) {
-                debugLog() << "In booh" << std::endl;
-            } else {
-                debugLog() << "Out yeah" << std::endl;
+            std::sort(eigenvalues.begin(), eigenvalues.end());
+            std::reverse(eigenvalues.begin(), eigenvalues.end());
+            for (int i = 0; i < 3; i++) {
+                debugLog() << eigenvalues[i] << std::endl;
             }
-        }
-
-        double getDistance(Point3 p1, Point3 p2){
-            double result = sqrt(pow((p2[0]-p1[0]), 2.0)+pow((p2[1]-p1[1]), 2.0));
-            return result;
-        }
-
-        Point2 to2D(Point3 p) {
-            return Point2(p[0], p[1]);
-        }
-
-        Point3 to3D(Point2 p) {
-            return Point3(p[0], p[1], 0);
         }
 
     };

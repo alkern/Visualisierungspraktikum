@@ -2,7 +2,7 @@
 #include <fantom/register.hpp>
 #include <fantom/fields.hpp>
 #include <fantom/graphics.hpp>
-#include "Util.h"
+#include "Util.hpp"
 #include <math.h>
 
 using namespace fantom;
@@ -177,11 +177,6 @@ namespace
         Point3 getMiddle(Point3 p1, Point3 p2){
             Point3 result = p1 + ((p2-p1)/2) ;
             return result;
-        }
-
-        //take 2D Point and returns it in 3D
-        Point3 to3D(Point2 p) {
-            return Point3(p[0], p[1], 0);
         }
     };
 
