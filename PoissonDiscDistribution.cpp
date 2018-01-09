@@ -22,8 +22,8 @@ namespace
             Options( Control& control ) : DataAlgorithm::Options( control )
             {
                 add< Grid < 2 > >("Grid", "Grid" );
-                add<double>("Delta Seed", "Distanz der Zufallspunkte", 1.3);
-                add<int>("Grow Rate", "Groesse der Iterationsschritte", 25);
+                add<double>("Delta Seed", "Distanz der Zufallspunkte", 0.2);
+                add<int>("Grow Rate", "Groesse der Iterationsschritte", 30);
                 add<int>("Number Start Points", "Anzahl Startpunkte", 1);
             }
         };
