@@ -107,14 +107,15 @@ namespace
         {
             Options( Control& control ) : VisAlgorithm::Options( control )
             {
-                add< TensorFieldContinuous<2, Vector2>>("Field", "Feld mit Input" ); ///home/visprak11/fantom/TestData/streamTest2.vtk
-                add< InputChoices >("Method", "Integrationsverfahren", std::vector<std::string>({"Euler", "Runge-Kutta"}), "Euler");
-                add< double >("Stepwidth", "Schrittweite fuer das Euler-Verfahren", 0.1);
-                add< double >("Adaptiver Grenzwert", "Epsilon fuer die adaptive Schrittweitenanpassung bei Euler", 0.1);
-                add< int >("Number of Steps", "Maximale Anzahl an Integrationsschritten", 100);
-                add< Color >("Color", "Farbe der Stromlinien", Color(0.75, 0.75, 0.0));
-                add< DefaultValueArray<Point3> >("Seedpoints", "Saatpunkte");
-                add < double >("Delta Streamline", "Abbruchsdistanz fuer Streamlines", 0.07);
+                add<TensorFieldContinuous<2, Vector2>>("Field", "Feld mit Input" ); ///home/visprak11/fantom/TestData/streamTest2.vtk
+                add<InputChoices>("Method", "Integrationsverfahren", std::vector<std::string>({"Euler", "Runge-Kutta"}), "Euler");
+                add<double>("Stepwidth", "Schrittweite fuer das Euler-Verfahren", 0.1);
+                add<double>("Adaptiver Grenzwert", "Epsilon fuer die adaptive Schrittweitenanpassung bei Euler", 0.1);
+                add<int>("Number of Steps", "Maximale Anzahl an Integrationsschritten", 100);
+                add<Color>("Color", "Farbe der Stromlinien", Color(0.75, 0.75, 0.0));
+                add<DefaultValueArray<Point3> >("Seedpoints", "Saatpunkte");
+                add<double>("Delta Streamline", "Abbruchsdistanz fuer Streamlines", 0.07);
+                add<bool>("Show seedpoints", "Zeige Seedpoints an", true);
             }
 
             void optionChanged( const std::string& name )
@@ -174,7 +175,7 @@ namespace
             if (method.compare("Euler") == 0) integrator = new Euler(options.get< double >("Stepwidth"), options.get<int>("Number of Steps"), options.get<double>("Adaptiver Grenzwert"));
             if (method.compare("Runge-Kutta") == 0) integrator = new RungeKutta(options.get< double >("Stepwidth"), options.get<int>("Number of Steps"));
 
-            mGlyphs->add(Primitive::POINTS).setColor(Color(1, 0, 0)).setPointSize(4).setVertices(startPoints);
+            if (options.get<bool>("Show seedpoints")) mGlyphs->add(Primitive::POINTS).setColor(Color(1, 0, 0)).setPointSize(4).setVertices(startPoints);
 
             //Streamlines von Startpunkten aus zeichnen
             for (size_t i = 0; i < startPoints.size(); i++) {
