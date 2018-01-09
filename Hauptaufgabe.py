@@ -6,7 +6,7 @@
 ################################################################
 ###                  Reset GUI                               ###
 ################################################################
-fantom.ui.setCamera( 0, fantom.ui.Camera( fantom.math.Vector3(4.86254, 0.0639636, 16.3943), fantom.math.Vector3(4.86569, 0.0650036, 15.3943), fantom.math.Vector3(0.00623076, 0.99998, 0.00105962), 1, 3.45644e-310 ) )
+fantom.ui.setCamera( 0, fantom.ui.Camera( fantom.math.Vector3(4.86254, 0.0639636, 16.3943), fantom.math.Vector3(4.86569, 0.0650036, 15.3943), fantom.math.Vector3(0.00623076, 0.99998, 0.00105961), 1, -3.47652e-310 ) )
 fantom.ui.setCamera( 1, fantom.ui.Camera( fantom.math.Vector3(0, 3.8637, 0), fantom.math.Vector3(0, 2.8637, 0), fantom.math.Vector3(0, 0, 1), 0, 1 ) )
 fantom.ui.setCamera( 2, fantom.ui.Camera( fantom.math.Vector3(0, 0, 3.8637), fantom.math.Vector3(0, 0, 2.8637), fantom.math.Vector3(0, 1, 0), 0, 1 ) )
 fantom.ui.setCamera( 3, fantom.ui.Camera( fantom.math.Vector3(3.8637, -0.2, 0), fantom.math.Vector3(2.8637, -0.2, 0), fantom.math.Vector3(0, 0, 1), 0, 1 ) )
@@ -41,7 +41,7 @@ Grid_ShowGrid.setOption("Random jittering of color", True)
 Grid_ShowGrid.setOption("Random seed", 0)
 Grid_ShowGrid.setOption("Line width", 1.5)
 fantom.ui.setAlgorithmPosition(Grid_ShowGrid, fantom.math.Vector2(266, 17))
-Grid_ShowGrid.setVisualOutputVisible('grid', False)
+Grid_ShowGrid.setVisualOutputVisible('grid', True)
 
 Hauptaufgabe_StreamLineDrawer = fantom.makeAlgorithm("Hauptaufgabe/StreamLineDrawer")
 Hauptaufgabe_StreamLineDrawer.setName( "Hauptaufgabe/StreamLineDrawer" )
@@ -75,13 +75,14 @@ fantom.ui.setAlgorithmPosition(Hauptaufgabe_PoissonDiscDistribution, fantom.math
 ################################################################
 ###                     Make Connections                     ###
 ################################################################
-Load_VTK.connect("Grid", Hauptaufgabe_PoissonDiscDistribution, "Grid")
-Load_VTK.connect("Grid", Grid_ShowGrid, "Grid")
-Load_VTK.connect("Fields", Hauptaufgabe_CriticalPoints, "Field")
-Load_VTK.connect("Fields", Hauptaufgabe_StreamLineDrawer, "Field")
-Hauptaufgabe_CriticalPoints.connect("Critical Points", Hauptaufgabe_SeedpointTemplates, "Critical Points")
+Load_VTK.connect("Fields", Hauptaufgabe_SeedpointTemplates, "Field")
 Hauptaufgabe_PoissonDiscDistribution.connect("Seedpoints", Hauptaufgabe_SeedpointTemplates, "Random Points")
+Hauptaufgabe_CriticalPoints.connect("Critical Points", Hauptaufgabe_SeedpointTemplates, "Critical Points")
+Load_VTK.connect("Fields", Hauptaufgabe_StreamLineDrawer, "Field")
+Load_VTK.connect("Fields", Hauptaufgabe_CriticalPoints, "Field")
+Load_VTK.connect("Grid", Grid_ShowGrid, "Grid")
 Hauptaufgabe_SeedpointTemplates.connect("Seedpoints", Hauptaufgabe_StreamLineDrawer, "Seedpoints")
+Load_VTK.connect("Grid", Hauptaufgabe_PoissonDiscDistribution, "Grid")
 
 
 ################################################################
